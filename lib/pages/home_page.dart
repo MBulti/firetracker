@@ -15,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Kilver Firetracker"),
+        title: const Text("Kilver Firetracker"),
       ),
       bottomNavigationBar: NavigationBar(
         destinations: const <Widget>[
@@ -39,7 +39,11 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      body: [const VehicleList(), const SheduledChecks(), const EquipmentList()][selectedIndex],
+      body: [
+        const VehicleList(),
+        const SheduledChecks(),
+        const EquipmentList()
+      ][selectedIndex],
     );
   }
 }
@@ -53,12 +57,12 @@ class EquipmentList extends StatelessWidget {
       addAutomaticKeepAlives: true,
       itemCount: 20,
       itemBuilder: (context, index) {
-        return Container(
+        return SizedBox(
           height: 50,
           child: Column(
             children: [
               Text("Equipment $index"),
-              Text("Test"),
+              const Text("Test"),
             ],
           ),
         );
@@ -74,12 +78,13 @@ class VehicleList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text("Vehicles"),
-        ElevatedButton(onPressed: () {
-          Navigator.push(context,
+        const Text("Vehicles"),
+        ElevatedButton(
+            onPressed: () {
+              Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const DetailPage()));
-          }
-        , child: const Text("Test")),
+            },
+            child: const Text("Test")),
       ],
     );
   }
