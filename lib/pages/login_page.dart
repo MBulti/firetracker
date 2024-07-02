@@ -1,112 +1,102 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'pages.dart'; // Ensure you have this import correctly set up for HomePage
 
-import 'pages.dart';
+// Controller to manage login state
+class LoginController extends GetxController {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  late final StreamSubscription<AuthState> authStateSubscription;
 
+  @override
+  void onInit() {
+    super.onInit();
+    print("LoginController onInit"); // Debug print to verify onInit is called
+
+    // authStateSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+    //   if (event.session != null) {
+    //     print("Auth state changed: User logged in");
+    //     //Get.offAll(() => HomePage());
+    //     //onClose();
+    //   }
+    // });
+  }
+
+  @override
+  void onClose() {
+    print("LoginController onClose"); // Debug print to verify onClose is called
+
+    emailController.dispose();
+    passwordController.dispose();
+    //authStateSubscription.cancel();
+    super.onClose();
+  }
+
+  Future<void> login() async {
+    try {
+      await Supabase.instance.client.auth.signInWithPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      Get.offAll(const HomePage());
+    } on AuthException catch (e) {
+      Get.snackbar('Error', e.message, snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
+  Future<void> guestLogin() async {
+    try {
+      await Supabase.instance.client.auth.signInAnonymously();
+      Get.offAll(const HomePage());
+    } on AuthException catch (e) {
+      Get.snackbar('Error', e.message, snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+}
+
+// Login Page
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 20,
-          ),
-          LoginCard(),
-        ],
+    final controller = Get.put(LoginController());
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
       ),
-    );
-  }
-}
-
-class LoginCard extends StatefulWidget {
-  const LoginCard({super.key});
-
-  @override
-  State<LoginCard> createState() => _LoginCardState();
-}
-
-class _LoginCardState extends State<LoginCard> {
-  late final StreamSubscription<AuthState> _authStateSubscription;
-
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    _authStateSubscription =
-        Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-      if (event.session != null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const HomePage()));
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _authStateSubscription.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Card(
-        color: Colors.white,
-        margin: const EdgeInsets.all(20.0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                decoration: const InputDecoration(labelText: 'Email'),
-                controller: _emailController,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: controller.emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
               ),
-              const SizedBox(height: 10),
-              TextField(
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  controller: _passwordController),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await Supabase.instance.client.auth.signInWithPassword(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    );
-                  } on AuthException catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(e.message)),
-                    );
-                  }
-                },
-                child: const Text('Login'),
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: controller.passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password',
               ),
-              ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      await Supabase.instance.client.auth.signInAnonymously();
-                    } on AuthException catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(e.message)),
-                      );
-                    }
-                  },
-                  child: const Text('Gast Login'))
-            ],
-          ),
+            ),
+            const SizedBox(height: 24.0),
+            ElevatedButton(
+              onPressed: controller.login,
+              child: const Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: controller.guestLogin,
+              child: const Text('Gast Login'),
+            ),
+          ],
         ),
       ),
     );

@@ -1,4 +1,6 @@
+import 'package:firetracker/utils/xlations.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'pages/pages.dart';
 
@@ -15,8 +17,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Kilver Firetracker',
+      translations: XLations(),
+      locale: const Locale('de', 'DE'),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
