@@ -1,34 +1,23 @@
+import 'package:firetracker/controller/controller.dart';
+import 'package:firetracker/utils/structures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'pages.dart'; // Ensure you have this import correctly set up for VehicleList, SheduledChecks, and EquipmentList
-
-class HomeController extends GetxController {
-  var obsSelectedIndex = 0.obs;
-
-  @override
-  void onInit() {
-    print("OnInit HomeController");
-    super.onInit();
-  }
-
-  void setSelectedIndex(int index) {
-    obsSelectedIndex.value = index;
-    Get.back();
-  }
-
-  void logout() {
-    Supabase.instance.client.auth.signOut();
-    Get.offAll(const LoginPage());
-  }
-}
+import 'pages.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+  final List<Widget> lsWidgets = const <Widget>[
+    VehicleList(),
+    EquipmentList(),
+    CheckList(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(HomeController());
+    final shedulecontroller = Get.put(SheduleController());
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Kilver Firetracker"),
@@ -40,64 +29,45 @@ class HomePage extends StatelessWidget {
         // ],
       ),
       body: Obx(
-        () {
-          return [
-            const VehicleList(),
-            const SheduledChecks(),
-            const EquipmentList(),
-            const Settings(),
-          ][controller.obsSelectedIndex.value];
-        },
-      ),
+          () => lsWidgets.elementAt(controller.obsSelectedIndex.value.index)),
+      floatingActionButton: Obx(() {
+        return controller.obsSelectedIndex.value == TabItem.checklist
+            ? FloatingActionButton(
+                onPressed: shedulecontroller.onFloatingButtonPressed,
+                tooltip: 'Increment',
+                child: const Icon(Icons.add),
+              )
+            : Container();
+      }),
       bottomNavigationBar: Obx(
         () {
-          return NavigationBar(
-            selectedIndex: controller.obsSelectedIndex.value,
-            onDestinationSelected: controller.setSelectedIndex,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.fire_truck_rounded),
-                label: 'Vehicles',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.calendar_month_rounded),
-                label: 'Prüfung',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.list_rounded),
-                label: 'Prüflisten',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.settings_rounded),
-                label: 'Einstellungen',
-              ),
-            ],
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: NavigationBar(
+              selectedIndex: controller.obsSelectedIndex.value.index,
+              onDestinationSelected: controller.setSelectedIndex,
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.fire_truck_rounded),
+                  label: 'Vehicles',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.calendar_month_rounded),
+                  label: 'Prüfung',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.checklist_rounded),
+                  label: 'Prüflisten',
+                ),
+                // NavigationDestination(
+                //   icon: Icon(Icons.settings_rounded),
+                //   label: 'Einstellungen',
+                // ),
+              ],
+            ),
           );
         },
       ),
-    );
-  }
-}
-
-class EquipmentList extends StatelessWidget {
-  const EquipmentList({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      addAutomaticKeepAlives: true,
-      itemCount: 20,
-      itemBuilder: (context, index) {
-        return SizedBox(
-          height: 50,
-          child: Column(
-            children: [
-              Text("Equipment $index"),
-              Text("hello".tr),
-            ],
-          ),
-        );
-      },
     );
   }
 }
@@ -121,8 +91,8 @@ class VehicleList extends StatelessWidget {
   }
 }
 
-class SheduledChecks extends StatelessWidget {
-  const SheduledChecks({super.key});
+class EquipmentList extends StatelessWidget {
+  const EquipmentList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -130,20 +100,30 @@ class SheduledChecks extends StatelessWidget {
   }
 }
 
-class Settings extends StatelessWidget {
-  const Settings({super.key});
+class CheckList extends StatelessWidget {
+  const CheckList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(HomeController());
-    return Column(
-      children: [
-        const Text("Settings"),
-        ElevatedButton(
-          onPressed: controller.logout,
-          child: const Text("Logout"),
-        ),
-      ],
+    final SheduleController controller = Get.find();
+    return ListView.builder(
+      addAutomaticKeepAlives: true,
+      itemCount: 20,
+      itemBuilder: (context, index) {
+        return SizedBox(
+          height: 100,
+          child: Column(
+            children: [
+              Text("Equipment $index"),
+              Text("hello".tr),
+              ElevatedButton(
+                onPressed: controller.onFloatingButtonPressed,
+                child: const Text("Button"),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 }

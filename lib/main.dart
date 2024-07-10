@@ -1,3 +1,4 @@
+import 'package:firetracker/utils/theme.dart';
 import 'package:firetracker/utils/xlations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,10 +23,7 @@ class MyApp extends StatelessWidget {
       translations: XLations(),
       locale: const Locale('de', 'DE'),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
-        useMaterial3: true,
-      ),
+      theme: Get.isDarkMode? getDarkTheme(): getLightTheme(),
       home: getSessionPage(),
     );
   }
